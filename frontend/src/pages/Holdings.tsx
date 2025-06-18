@@ -2,8 +2,9 @@ import { useQuery } from '@tanstack/react-query';
 import { holdingColumns, HoldingRow } from '../tables/holdings';
 import { DataTable } from '../components/DataTable';
 import { rpc } from '../api/rpc';
+import React from 'react';
 
-export default function Holdings() {
+const Holdings: React.FC = () => {
   const { data = [] } = useQuery<HoldingRow[]>({
     queryKey: ['holdings'],
     queryFn: () => rpc<HoldingRow[]>({ method: 'get_holdings' }),
@@ -19,3 +20,5 @@ export default function Holdings() {
     </section>
   );
 }
+
+export default Holdings;
