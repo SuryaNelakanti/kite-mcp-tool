@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { rpc } from '../api/rpc';
-
+import React from 'react';
 interface Portfolio { available_cash: number; }
 
 export default function Dashboard() {
