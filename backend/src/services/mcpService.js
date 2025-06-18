@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 import RingBuffer from 'ringbufferjs';
 import { v4 as uuidv4 } from 'uuid';
 import { config } from '../config/index.js';
-import logger from '../utils/logger';
+import logger from '../utils/logger.js';
 
 class MCPService extends EventEmitter {
   constructor() {

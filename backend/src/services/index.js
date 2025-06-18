@@ -1,4 +1,6 @@
-import * as mcpService from './mcpService';
-import * as webSocketService from './webSocketService';
-
-export { mcpService, webSocketService };
+export { default as mcpService } from './mcpService.js';
+export {
+  initWebSocketService,
+  getWebSocketService,
+  default as webSocketService,
+} from './webSocketService.js';

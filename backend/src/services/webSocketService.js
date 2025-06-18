@@ -1,8 +1,8 @@
 import { WebSocketServer } from 'ws';
 import { v4 as uuidv4 } from 'uuid';
 import { config } from '../config/index.js';
-import logger from '../utils/logger';
-import { mcpService } from './mcpService';
+import logger from '../utils/logger.js';
+import mcpService from './mcpService.js';
 
 class WebSocketService {
   constructor(server) {
@@ -148,20 +148,23 @@ class WebSocketService {
   }
 }
 
-let webSocketService = null;
+let webSocketServiceInstance = null;
 
 export function initWebSocketService(server) {
-  if (!webSocketService) {
-    webSocketService = new WebSocketService(server);
+  if (!webSocketServiceInstance) {
+    webSocketServiceInstance = new WebSocketService(server);
   }
-  return webSocketService;
+  return webSocketServiceInstance;
 }
 
 export function getWebSocketService() {
-  if (!webSocketService) {
+  if (!webSocketServiceInstance) {
     throw new Error('WebSocketService not initialized');
   }
-  return webSocketService;
+  return webSocketServiceInstance;
 }
 
-export default webSocketService;
+export default {
+  initWebSocketService,
+  getWebSocketService,
+};

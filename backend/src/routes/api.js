@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { v4 as uuidv4 } from 'uuid';
-import { mcpService } from '../services/mcpService';
-import logger from '../utils/logger';
+import mcpService from '../services/mcpService.js';
+import logger from '../utils/logger.js';
 
 const router = Router();
 
