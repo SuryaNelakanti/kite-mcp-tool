@@ -5,9 +5,9 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import { StatusCodes } from 'http-status-codes';
 import { config } from './config/index.js';
-import { requestLogger, logger } from './utils/logger';
-import apiRoutes from './routes/api';
-import { mcpService } from './services/mcpService';
+import logger, { requestLogger } from './utils/logger.js';
+import apiRoutes from './routes/api.js';
+import mcpService from './services/mcpService.js';
 
 export function createApp() {
   const app = express();
@@ -79,4 +79,4 @@ export function createApp() {
   return app;
 }
 
-export default createApp();
+export default createApp;

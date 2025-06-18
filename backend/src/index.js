@@ -1,8 +1,8 @@
 import { createServer } from 'http';
 import { config } from './config/index.js';
 import { mcpService, initWebSocketService } from './services/index.js';
-import createApp from './app';
-import logger from './utils/logger';
+import createApp from './app.js';
+import logger from './utils/logger.js';
 
 // Create Express app
 const app = createApp();
