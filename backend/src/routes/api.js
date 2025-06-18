@@ -100,6 +100,8 @@ router.get('/login-url', (req, res) => {
  */
 router.post('/rpc', async (req, res) => {
   const { method, params = {} } = req.body;
+  logger.info(req, 'request');
+  logger.info(req.body, 'request body');
   const requestId = req.body.id || uuidv4();
 
   if (!method) {

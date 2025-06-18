@@ -14,6 +14,7 @@ import MarketData from './pages/MarketData';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 import useAuth from './hooks/useAuth';
+import ApiTest from './components/ApiTest';
 
 // Development mode - bypassing authentication
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -50,6 +51,7 @@ function App() {
             <Suspense fallback={<LoadingSpinner fullPage />}>
               <Routes>
                 <Route path="/login" element={<Login />} />
+                <Route path="/test-api" element={<ApiTest />} />
                 <Route
                   path="/"
                   element={
@@ -62,7 +64,7 @@ function App() {
                   <Route path="holdings" element={<Holdings />} />
                   <Route path="positions" element={<Positions />} />
                   <Route path="orders" element={<Orders />} />
-                  <Route path="gtt" element={<GttOrders />} />
+                  <Route path="gtt-orders" element={<GttOrders />} />
                   <Route path="market-data" element={<MarketData />} />
                   <Route path="profile" element={<Profile />} />
                 </Route>

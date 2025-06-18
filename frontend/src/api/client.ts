@@ -3,11 +3,13 @@ import { toast } from 'react-hot-toast';
 
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: '/',
+  baseURL: 'http://localhost:3001/api', // This will be proxied to the backend
   timeout: 30000, // 30 seconds
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
   },
+  withCredentials: true, // Important for cookies if using sessions
 });
 
 // Request interceptor to add auth token if exists
@@ -28,11 +30,33 @@ api.interceptors.request.use(
   }
 );
 
+// Define response types
+interface RpcResponse<T = any> {
+  jsonrpc: string;
+  id?: string | number | null;
+  result?: T;
+  error?: {
+    code: number;
+    message: string;
+    data?: any;
+  };
+}
+
 // Response interceptor to handle errors
 api.interceptors.response.use(
-  (response: AxiosResponse) => {
-    // Handle successful responses
-    return response.data;
+  (response: AxiosResponse<RpcResponse>) => {
+    const { data } = response;
+    
+    // Handle RPC error responses
+    if (data && data.error) {
+      const error = new Error(data.error.message || 'RPC Error');
+      (error as any).code = data.error.code;
+      (error as any).data = data.error.data;
+      return Promise.reject(error);
+    }
+    
+    // Return the result for successful responses
+    return data.result || data;
   },
   (error: AxiosError) => {
     // Handle errors
@@ -69,27 +93,23 @@ api.interceptors.response.use(
 );
 
 // API methods
-export const rpcRequest = async <T = any>(
+export async function rpcRequest<T = any>(
   method: string,
   params: Record<string, any> = {},
   config: AxiosRequestConfig = {}
-): Promise<T> => {
+): Promise<T> {
   try {
-    const response = await api.post('/rpc', {
+    const response = await api.post<RpcResponse<T>>('rpc', {
       jsonrpc: '2.0',
       method,
       params,
-      id: Math.random().toString(36).substring(7),
+      id: Date.now(),
     }, config);
-    
-    // Handle JSON-RPC error responses
-    if (response.error) {
-      throw new Error(response.error.message || 'RPC call failed');
-    }
-    
-    return response.result;
+
+    // The response interceptor will handle RPC errors
+    return response as unknown as T;
   } catch (error) {
-    console.error(`RPC call ${method} failed:`, error);
+    console.error('RPC Request failed:', error);
     throw error;
   }
 };
@@ -105,33 +125,53 @@ interface PaginatedResponse<T> {
   };
 }
 
-export const fetchPaginated = async <T = any>(
+export async function fetchPaginated<T = any>(
   method: string,
   params: Record<string, any> = {},
   page = 1,
   perPage = 20
-): Promise<PaginatedResponse<T>> => {
-  const result = await rpcRequest<{
-    data: T[];
-    total: number;
-    page: number;
-    per_page: number;
-  }>(method, {
-    ...params,
-    page,
-    per_page: perPage,
-  });
-  
-  return {
-    data: result.data,
-    pagination: {
-      total: result.total,
-      page: result.page,
-      per_page: result.per_page,
-      has_more: result.page * result.per_page < result.total,
-    },
-  };
-};
+): Promise<PaginatedResponse<T>> {
+  try {
+    const response = await rpcRequest<{
+      data: T[];
+      total: number;
+      page: number;
+      per_page: number;
+    }>(method, {
+      ...params,
+      page,
+      per_page: perPage,
+    });
+
+    // Handle the case where the response is already in the expected format
+    if (Array.isArray((response as any).data)) {
+      const data = response as any;
+      return {
+        data: data.data || [],
+        pagination: {
+          total: data.total || 0,
+          page: data.page || page,
+          per_page: data.per_page || perPage,
+          has_more: (data.page || page) * (data.per_page || perPage) < (data.total || 0),
+        },
+      };
+    }
+
+    // Fallback for different response formats
+    return {
+      data: Array.isArray(response) ? response : [],
+      pagination: {
+        total: 0,
+        page,
+        per_page: perPage,
+        has_more: false,
+      },
+    };
+  } catch (error) {
+    console.error(`Paginated request ${method} failed:`, error);
+    throw error;
+  }
+}
 
 // Export the axios instance in case it's needed directly
 export default api;

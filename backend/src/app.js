@@ -15,9 +15,12 @@ import path from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 export function createApp() {
   const app = express();
+
+  // Body parser middleware
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
 
   // Security middleware
   app.use(helmet());
@@ -25,8 +28,13 @@ export function createApp() {
   // CORS configuration
   app.use(cors({
     origin: config.frontendOrigin,
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    credentials: true,
+    exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
+    maxAge: 86400, // 24 hours
+    preflightContinue: false,
+    optionsSuccessStatus: 204
   }));
 
   // Request logging
@@ -48,7 +56,8 @@ export function createApp() {
 
   // Apply rate limiting to all API routes
   app.use('/api', apiLimiter);
-  
+
+    
   // Swagger configuration
   const swaggerOptions = {
     definition: {
@@ -89,7 +98,7 @@ export function createApp() {
       customSiteTitle: 'Zerodha MCP Proxy API Docs',
     })
   );
-
+  
   // API routes
   app.use('/api', apiRoutes);
 
