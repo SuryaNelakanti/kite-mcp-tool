@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import useWebSocket from '../hooks/useWebSocket';
+import ThemeToggle from './ThemeToggle';
 
 // Icons (using inline SVGs for better control)
 const Icons = {
@@ -81,10 +82,10 @@ export default function Layout() {
   useWebSocket();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* Sidebar for desktop */}
       <div className="hidden lg:flex lg:flex-shrink-0">
-        <div className="flex flex-col w-64 border-r border-gray-200 bg-white">
+        <div className="flex flex-col w-64 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
             <div className="flex items-center flex-shrink-0 px-4">
               <h1 className="text-xl font-semibold text-gray-900">Zerodha MCP</h1>
@@ -98,15 +99,19 @@ export default function Layout() {
                     to={item.href}
                     className={classNames(
                       isActive
-                        ? 'bg-gray-100 text-blue-600'
-                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900',
+                        ? 'bg-gray-100 dark:bg-gray-700/50 text-blue-600 ring-2 ring-cyan-400/60'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white',
                       'group flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-colors duration-150'
                     )}
                   >
-                    <span className={classNames(
-                      isActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500',
-                      'mr-3 flex-shrink-0 h-5 w-5'
-                    )}>
+                    <span
+                      className={classNames(
+                        isActive
+                          ? 'text-blue-500'
+                          : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400',
+                        'mr-3 flex-shrink-0 h-5 w-5'
+                      )}
+                    >
                       {Icons[item.icon as keyof typeof Icons]}
                     </span>
                     {item.name}
@@ -115,7 +120,8 @@ export default function Layout() {
               })}
             </nav>
           </div>
-          <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
+          <div className="flex-shrink-0 flex items-center justify-between gap-2 border-t border-gray-200 p-4">
+            <ThemeToggle />
             <button
               onClick={logout}
               className="group flex w-full items-center px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md transition-colors duration-150"
@@ -142,7 +148,7 @@ export default function Layout() {
           )}
           {/* Sidebar */}
           <div
-            className={`fixed inset-y-0 left-0 w-72 bg-white shadow-xl transform ${
+            className={`fixed inset-y-0 left-0 w-72 bg-white dark:bg-gray-800 shadow-xl transform ${
               sidebarOpen ? 'translate-x-0' : '-translate-x-full'
             } transition-transform duration-300 ease-in-out`}
           >
@@ -170,16 +176,20 @@ export default function Layout() {
                         to={item.href}
                         className={classNames(
                           isActive
-                            ? 'bg-blue-50 text-blue-600'
-                            : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900',
+                            ? 'bg-blue-50 dark:bg-gray-700/50 text-blue-600 ring-2 ring-cyan-400/60'
+                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white',
                           'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg mx-1 transition-colors duration-150'
                         )}
                         onClick={() => setSidebarOpen(false)}
                       >
-                        <span className={classNames(
-                          isActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500',
-                          'mr-3 flex-shrink-0 h-5 w-5'
-                        )}>
+                        <span
+                          className={classNames(
+                            isActive
+                              ? 'text-blue-500'
+                              : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400',
+                            'mr-3 flex-shrink-0 h-5 w-5'
+                          )}
+                        >
                           {Icons[item.icon as keyof typeof Icons]}
                         </span>
                         {item.name}
@@ -189,7 +199,8 @@ export default function Layout() {
                 </div>
               </nav>
               {/* Footer */}
-              <div className="border-t border-gray-100 p-4">
+              <div className="border-t border-gray-100 p-4 flex items-center justify-between gap-2">
+                <ThemeToggle />
                 <button
                   onClick={logout}
                   className="group flex w-full items-center rounded-lg p-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150"
@@ -206,25 +217,26 @@ export default function Layout() {
       </div>
 
       {/* Mobile header */}
-      <div className="lg:hidden sticky top-0 z-30 flex h-16 items-center bg-white px-4 shadow-sm">
+      <div className="lg:hidden sticky top-0 z-30 flex h-16 items-center bg-white dark:bg-gray-800 px-4 shadow-sm">
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-600"
+          className="inline-flex items-center justify-center rounded-md p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600"
           onClick={() => setSidebarOpen(true)}
         >
           <span className="sr-only">Open sidebar</span>
           {Icons.menu}
         </button>
-        <h1 className="ml-4 text-lg font-semibold text-gray-900">
+        <h1 className="ml-4 text-lg font-semibold text-gray-900 dark:text-gray-100 flex-1">
           {navigation.find((item) => item.href === location.pathname)?.name || 'Dashboard'}
         </h1>
+        <ThemeToggle />
       </div>
 
       {/* Main content */}
       <div className="lg:pl-64 flex flex-col flex-1">
         <div className="py-6">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-            <h1 className="text-2xl font-semibold text-gray-900">
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
               {navigation.find((item) => item.href === location.pathname)?.name || 'Dashboard'}
             </h1>
           </div>
