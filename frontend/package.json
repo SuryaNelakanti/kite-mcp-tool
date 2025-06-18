@@ -11,8 +11,10 @@
     "@radix-ui/react-tabs": "^1.1.12",
     "@tanstack/react-query": "^5.80.7",
     "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.13.10",
     "axios": "^1.10.0",
     "class-variance-authority": "^0.7.1",
+    "daisyui": "^5.0.43",
     "lucide-react": "^0.515.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -21,6 +23,7 @@
     "react-router-dom": "^7.6.2",
     "tailwind-merge": "^3.3.1",
     "typescript": "^5.8.3",
+    "use-dark-mode": "^2.3.1",
     "web-vitals": "^5.0.3"
   },
   "scripts": {

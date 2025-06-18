@@ -1,9 +1,10 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
 
 const useWebSocket = () => {
   const ws = useRef<WebSocket | null>(null);
+  const [connected, setConnected] = useState(false);
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
   const reconnectInterval = 5000; // 5 seconds
@@ -22,6 +23,7 @@ const useWebSocket = () => {
 
     ws.current.onopen = () => {
       console.log('WebSocket connected');
+      setConnected(true);
       reconnectAttempts.current = 0; // Reset reconnect attempts on successful connection
     };
 
@@ -65,6 +67,7 @@ const useWebSocket = () => {
 
     ws.current.onclose = (event) => {
       console.log('WebSocket disconnected:', event.reason);
+      setConnected(false);
       ws.current = null;
       
       // Attempt to reconnect if we haven't exceeded max attempts
@@ -122,8 +125,8 @@ const useWebSocket = () => {
     };
   }, [connect]);
 
-  // Return WebSocket instance if needed by components
-  return ws.current;
+  // Return connection status and instance if needed
+  return { ws: ws.current, connected };
 };
 
 export default useWebSocket;
