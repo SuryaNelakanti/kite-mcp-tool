@@ -1,3 +1,4 @@
+import React from "react"
 import { NavLink, Outlet } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { rpc } from '../api/rpc';
@@ -15,9 +16,16 @@ const links = [
   { to: '/profile', label: 'Profile', icon: User },
 ];
 
+interface MarginsData {
+  available_cash: number;
+}
+
 export default function Layout() {
   const { connected } = useWebSocket();
-  const { data } = useQuery(['margins'], () => rpc<{ available_cash: number }>({ method: 'get_margins' }));
+  const { data } = useQuery<MarginsData>({
+    queryKey: ['margins'],
+    queryFn: () => rpc<MarginsData>({ method: 'get_margins' })
+  });
   return (
     <div className="grid grid-cols-[60px,1fr] lg:grid-cols-[200px,1fr] min-h-screen">
       <aside className="bg-base-200 text-base-content sticky top-0 h-screen group">

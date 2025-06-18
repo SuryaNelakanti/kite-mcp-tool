@@ -1,4 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table';
+import React from 'react';
 
 export interface HoldingRow {
   tradingsymbol: string;
