@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import { BrowserRouter as Router } from 'react-router-dom';
 import App from './App';
 import './index.css';
+import { ThemeProvider } from './hooks/useTheme';
 
 // Create a client for React Query
 const queryClient = new QueryClient({
@@ -19,11 +20,13 @@ const queryClient = new QueryClient({
 // Render the app
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <App />
-        <Toaster position="top-right" />
-      </Router>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          <App />
+          <Toaster position="top-right" />
+        </Router>
+      </QueryClientProvider>
+    </ThemeProvider>
   </React.StrictMode>
 );
