@@ -3,17 +3,26 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "start": "node backend/dist/index.js",
-    "test": "jest",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "lint": "oxlint ."
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
-    "@types/jest": "^30.0.0",
     "@types/node": "^24.0.3",
     "@types/supertest": "^6.0.3",
-    "jest": "^30.0.2",
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
+    "express-rate-limit": "^7.5.0",
+    "http-status-codes": "^2.3.0",
+    "morgan": "^1.10.0",
     "oxlint": "^1.2.0",
+    "pino": "^9.7.0",
+    "pino-pretty": "^13.0.0",
     "supertest": "^7.1.1",
-    "ts-jest": "^29.4.0"
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "ts-node": "^10.9.2",
+    "vitest": "^3.2.4"
   }
 }
