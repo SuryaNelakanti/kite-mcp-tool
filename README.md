@@ -19,3 +19,11 @@ cd ../frontend && pnpm dev
 ## Deployment
 
 This repo is configured for Railway. Push your changes and deploy.
+
+Environment variables in `.env` (see `.env.example`):
+
+- `PORT` - HTTP port
+- `OPENAI_API_KEY` - optional, for /chat
+- `CORS_ORIGIN` - allowed frontend origin
+
+Deploy on Railway using provided `railway.json`.
