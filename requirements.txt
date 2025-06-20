@@ -1,0 +1,19 @@
+# ── core MCP + agent stack ─────────────────────────────
+mcp[cli]==1.3.0
+atomic-agents==1.0.21
+openai==1.63.2
+instructor==1.7.2
+
+# ── web search & scraping helpers ──────────────────────
+aiohttp==3.11.12
+requests==2.32.3
+beautifulsoup4==4.13.3
+markdownify==0.14.1
+readability-lxml==0.8.1
+lxml[html_clean]==5.3.1
+pydantic==2.10.6
+python-dotenv==1.0.1
+
+# ── testing ────────────────────────────────────────────
+pytest==8.2.1
+pytest-asyncio==0.23.7
