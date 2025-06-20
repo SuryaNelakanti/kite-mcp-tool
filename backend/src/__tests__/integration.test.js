@@ -22,6 +22,7 @@ describe('integration', () => {
   let server;
   let port;
   let mockProc;
+  let wsService;
 
   beforeAll((done) => {
     mockProc = createMockProcess();
@@ -29,7 +30,7 @@ describe('integration', () => {
 
     const app = createApp();
     server = createServer(app);
-    initWebSocketService(server);
+    wsService = initWebSocketService(server);
     server.listen(0, () => {
       port = server.address().port;
       mcpService.start();
@@ -38,6 +39,7 @@ describe('integration', () => {
   });
 
   afterAll((done) => {
+    wsService.close();
     mcpService.stop();
     server.close(done);
   });
