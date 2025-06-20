@@ -135,7 +135,7 @@ router.get('/oauth/callback', async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-router.post('/rpc', async (req, res) => {
+export async function handleRpc(req, res) {
   const { method, params = {} } = req.body;
   logger.info(req, 'request');
   logger.info(req.body, 'request body');
@@ -174,7 +174,9 @@ router.post('/rpc', async (req, res) => {
       },
     });
   }
-});
+}
+
+router.post('/rpc', handleRpc);
 
 /**
  * @openapi

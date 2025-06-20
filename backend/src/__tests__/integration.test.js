@@ -69,7 +69,7 @@ describe('integration', () => {
     });
 
     const rpc1 = await request(`http://localhost:${port}`)
-      .post('/api/rpc')
+      .post('/rpc')
       .send({ jsonrpc: '2.0', id: 1, method: 'get_profile' });
     expect(rpc1.status).toBe(401);
 
@@ -88,7 +88,7 @@ describe('integration', () => {
     });
 
     const rpc2 = await request(`http://localhost:${port}`)
-      .post('/api/rpc')
+      .post('/rpc')
       .send({ jsonrpc: '2.0', id: 2, method: 'get_profile' });
     expect(rpc2.status).toBe(200);
     expect(rpc2.body.result.user_id).toBe('AB1234');
