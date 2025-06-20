@@ -6,7 +6,6 @@ import { PassThrough } from 'stream';
 import createApp from '../app.js';
 import { mcpService, initWebSocketService } from '../services/index.js';
 import { jest } from '@jest/globals';
-import * as child from 'child_process';
 
 
 function createMockProcess() {

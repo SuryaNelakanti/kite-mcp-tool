@@ -1,5 +1,4 @@
 const express = require('express');
-const { createProxyMiddleware } = require('http-proxy-middleware');
 const WebSocket = require('ws');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -9,7 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 
 // Configuration
 const PORT = process.env.PORT || 3001;
-const MCP_SSE_URL = process.env.MCP_SSE_URL || 'https://mcp.kite.trade/sse';
+// const MCP_SSE_URL = process.env.MCP_SSE_URL || 'https://mcp.kite.trade/sse';
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Initialize Express app
@@ -116,7 +115,7 @@ app.post('/rpc', apiLimiter, async (req, res) => {
 });
 
 // Simulate MCP forwarding
-async function forwardToMCP(method, params) {
+async function forwardToMCP(method, _) {
   // In a real implementation, this would forward to the MCP service
   // For now, we'll simulate some responses
   if (method === 'get_profile') {

@@ -12,6 +12,7 @@ export const validate = <T>(schema: ZodSchema<T>) => (
     req.body = data as unknown as Request['body'];
     next();
   } catch (err) {
+    console.info(err);
     next(new HttpError(400, 'invalid_request'));
   }
 };

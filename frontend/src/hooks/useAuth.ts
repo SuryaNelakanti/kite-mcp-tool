@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation,  useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 
 interface User {
@@ -102,7 +102,7 @@ const useAuth = (): AuthContextType => {
   }, [loginMutation]);
 
   // Function to handle successful login
-  const handleLoginSuccess = useCallback(
+  const _handleLoginSuccess = useCallback(
     (userData: User, token: string) => {
       setUser(userData);
       setStoredAuth({ user: userData, token });

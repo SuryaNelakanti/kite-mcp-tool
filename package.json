@@ -3,13 +3,15 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "start": "node backend/dist/index.js",
-    "test": "jest"
+    "test": "jest",
+    "lint": "oxlint ."
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.0.3",
     "@types/supertest": "^6.0.3",
+    "oxlint": "^1.2.0",
     "supertest": "^7.1.1",
     "ts-jest": "^29.4.0"
   }

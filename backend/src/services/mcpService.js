@@ -109,7 +109,7 @@ class MCPService extends EventEmitter {
       
       // Handle JSON-RPC responses
       if (parsed.id && this.pendingRequests.has(parsed.id)) {
-        const { resolve, reject, timeout, method, startTime } = this.pendingRequests.get(parsed.id);
+        const { resolve, _, timeout, method, startTime } = this.pendingRequests.get(parsed.id);
         clearTimeout(timeout);
         this.pendingRequests.delete(parsed.id);
 

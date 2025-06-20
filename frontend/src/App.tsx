@@ -13,7 +13,6 @@ import GttOrders from './pages/GttOrders';
 import MarketData from './pages/MarketData';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
-import useAuth from './hooks/useAuth';
 import ApiTest from './components/ApiTest';
 
 // Development mode - bypassing authentication

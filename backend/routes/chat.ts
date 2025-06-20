@@ -39,6 +39,7 @@ router.post('/', validate(UserReq), async (req, res, next) => {
     const result = await mcpClient.call(rpcReq);
     res.json(result);
   } catch (err) {
+    console.info(err);
     next(new HttpError(400, 'invalid_request'));
   }
 });
