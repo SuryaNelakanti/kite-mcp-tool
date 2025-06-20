@@ -15,9 +15,14 @@ const RpcReq = z.object({
 
 router.post('/', validate(RpcReq), async (req, res, next) => {
   const payload = RpcReq.parse(req.body);
-  const id = payload.id ?? crypto.randomUUID();
+  const request = {
+    jsonrpc: '2.0' as const,
+    id: payload.id ?? crypto.randomUUID(),
+    method: payload.method,
+    params: payload.params,
+  };
   try {
-    const result = await mcpClient.call(payload.method, payload.params);
+    const result = await mcpClient.call(request);
     res.json(result);
   } catch (err: any) {
     if (err.code === 429) {

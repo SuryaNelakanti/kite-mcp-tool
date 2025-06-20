@@ -2,7 +2,6 @@ import { spawn, ChildProcess } from 'child_process';
 import * as readline from "node:readline";
 import { Readable } from "stream";
 import { EventEmitter } from 'events';
-import { v4 as uuidv4 } from 'uuid';
 import logger from './utils/logger.js';
 import { JsonRpcRequest, JsonRpcResponse } from './types/rpc.js';
 
@@ -53,16 +52,14 @@ export class MCPClient {
     }
   }
 
-  call(method: string, params: Record<string, unknown> = {}) {
-    const id = uuidv4();
-    const req: JsonRpcRequest = { jsonrpc: '2.0', id, method, params };
+  call(req: JsonRpcRequest) {
     const payload = JSON.stringify(req) + '\n';
     return new Promise<JsonRpcResponse>((resolve, reject) => {
       if (!this.proc) return reject(new Error('mcp not running'));
-      this.resolvers.set(id, resolve);
+      this.resolvers.set(req.id, resolve);
       this.proc.stdin!.write(payload, (err) => {
         if (err) {
-          this.resolvers.delete(id);
+          this.resolvers.delete(req.id);
           reject(err);
         }
       });

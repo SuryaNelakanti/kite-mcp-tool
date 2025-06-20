@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { Router } from 'express';
 import { z } from 'zod';
 import { HumanMessage, SystemMessage } from "langchain/schema";
@@ -29,7 +30,13 @@ router.post('/', validate(UserReq), async (req, res, next) => {
       new HumanMessage(req.body.message),
     ]);
     const json = await parser.parse(resp.text);
-    const result = await mcpClient.call(json.method, json.params);
+    const rpcReq = {
+      jsonrpc: '2.0' as const,
+      id: crypto.randomUUID(),
+      method: json.method,
+      params: json.params,
+    };
+    const result = await mcpClient.call(rpcReq);
     res.json(result);
   } catch (err) {
     next(new HttpError(400, 'invalid_request'));
