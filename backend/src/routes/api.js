@@ -3,8 +3,11 @@ import { StatusCodes } from 'http-status-codes';
 import { v4 as uuidv4 } from 'uuid';
 import mcpService from '../services/mcpService.js';
 import logger from '../utils/logger.js';
+import axios from 'axios';
+import crypto from 'crypto';
 
 const router = Router();
+let cachedLoginUrl = null;
 
 /**
  * @openapi
@@ -56,10 +59,44 @@ router.get('/health', (req, res) => {
  *                   example: https://kite.zerodha.com/connect/login?api_key=your_api_key
  */
 router.get('/login-url', (req, res) => {
-  // In a real implementation, this would come from MCP's 401 response
-  res.status(StatusCodes.OK).json({
-    login_url: 'https://kite.zerodha.com/connect/login?api_key=your_api_key&request_token=your_request_token',
-  });
+  if (cachedLoginUrl && cachedLoginUrl.expires > Date.now()) {
+    return res.json({ login_url: cachedLoginUrl.url });
+  }
+  return res.status(StatusCodes.NOT_FOUND).json({ error: 'Not Found' });
+});
+
+router.get('/oauth/callback', async (req, res) => {
+  const { request_token } = req.query;
+  if (!request_token) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ error: 'Missing request_token' });
+  }
+
+  const apiKey = process.env.KITE_API_KEY;
+  const apiSecret = process.env.KITE_API_SECRET;
+  const checksum = crypto
+    .createHash('sha256')
+    .update(apiKey + request_token + apiSecret)
+    .digest('hex');
+
+  try {
+    const response = await axios.post('https://api.kite.trade/session/token', {
+      api_key: apiKey,
+      request_token,
+      checksum,
+    });
+
+    const accessToken = response.data?.data?.access_token;
+    if (accessToken) {
+      process.env.ACCESS_TOKEN = accessToken;
+      cachedLoginUrl = null;
+      mcpService.stop();
+      mcpService.start();
+    }
+    res.json({ status: 'ok' });
+  } catch (err) {
+    logger.error({ err }, 'OAuth callback failed');
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'OAuth failed' });
+  }
 });
 
 /**
@@ -98,7 +135,7 @@ router.get('/login-url', (req, res) => {
  *       500:
  *         description: Internal server error
  */
-router.post('/rpc', async (req, res) => {
+export async function handleRpc(req, res) {
   const { method, params = {} } = req.body;
   logger.info(req, 'request');
   logger.info(req.body, 'request body');
@@ -114,52 +151,32 @@ router.post('/rpc', async (req, res) => {
 
   try {
     logger.debug({ method, params }, 'RPC request');
-    const result = await mcpService.call(method, params);
-    
-    res.json({
-      jsonrpc: '2.0',
-      id: requestId,
-      result,
-    });
+    const rpcResponse = await mcpService.call(method, params);
+
+    if (rpcResponse.error?.code === 401 && rpcResponse.error.data?.login_url) {
+      cachedLoginUrl = { url: rpcResponse.error.data.login_url, expires: Date.now() + 15 * 60 * 1000 };
+      res.status(StatusCodes.UNAUTHORIZED);
+    } else if (rpcResponse.error?.code === 429) {
+      res.status(StatusCodes.TOO_MANY_REQUESTS);
+    }
+
+    res.json(rpcResponse);
   } catch (error) {
     logger.error({ err: error, method }, 'RPC error');
-    
-    // Handle login URL response
-    if (error.code === 401 && error.data?.login_url) {
-      return res.status(StatusCodes.UNAUTHORIZED).json({
-        jsonrpc: '2.0',
-        id: requestId,
-        error: {
-          code: 401,
-          message: 'Authentication required',
-          data: { login_url: error.data.login_url },
-        },
-      });
-    }
-
-    // Handle rate limiting
-    if (error.code === 429) {
-      return res.status(StatusCodes.TOO_MANY_REQUESTS).json({
-        jsonrpc: '2.0',
-        id: requestId,
-        error: {
-          code: 429,
-          message: 'Rate limit exceeded',
-          retry_after: error.retry_after,
-        },
-      });
-    }
-
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+    const code = error.code || -32603;
+    const status = code === 504 ? 504 : StatusCodes.INTERNAL_SERVER_ERROR;
+    res.status(status).json({
       jsonrpc: '2.0',
       id: requestId,
       error: {
-        code: error.code || -32603,
+        code,
         message: error.message || 'Internal server error',
       },
     });
   }
-});
+}
+
+router.post('/rpc', handleRpc);
 
 /**
  * @openapi
