@@ -147,3 +147,8 @@ The application uses HTTP status codes and consistent error response formats:
 ## Deployment
 
 The application is configured for deployment on Railway, with configuration in `railway.json`.
+
+## MCP Wire-Up
+This project now connects directly to Zerodha's Message Control Protocol. When an RPC call fails with a `401` error that includes a `login_url`, the URL is cached for 15 minutes and can be retrieved from `GET /api/login-url`. After the OAuth flow completes and `/api/oauth/callback` is hit, the backend exchanges the `request_token` for an `access_token` using `KITE_API_KEY` and `KITE_API_SECRET`. The token is stored server-side only and the MCP service is restarted so it reconnects with the new credentials.
+
+`MCP_SSE_URL` controls the upstream endpoint. If `mcp-remote` crashes more than five times in a minute the process exits which allows Railway to restart the container.
