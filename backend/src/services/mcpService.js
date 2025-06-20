@@ -1,9 +1,10 @@
-import { spawn } from 'child_process';
+import { spawn as childSpawn } from 'child_process';
 import { EventEmitter } from 'events';
 import RingBuffer from 'ringbufferjs';
 import { v4 as uuidv4 } from 'uuid';
 import { config } from '../config/index.js';
 import logger from '../utils/logger.js';
+import { rpcRequestSchema } from '../types/mcp.js';
 
 class MCPService extends EventEmitter {
   constructor() {
@@ -13,6 +14,8 @@ class MCPService extends EventEmitter {
     this.pendingRequests = new Map();
     this.logs = new RingBuffer(1000);
     this.restartTimeout = null;
+    this.crashTimestamps = [];
+    this.spawn = childSpawn;
   }
 
   start() {
@@ -22,7 +25,7 @@ class MCPService extends EventEmitter {
 
     logger.info(`Starting MCP process with SSE URL: ${config.mcp.sseUrl}`);
     
-    this.process = spawn('npx', ['mcp-remote', config.mcp.sseUrl], {
+    this.process = this.spawn('npx', ['mcp-remote', config.mcp.sseUrl], {
       stdio: ['pipe', 'pipe', 'pipe'],
       shell: process.platform === 'win32',
     });
@@ -35,6 +38,9 @@ class MCPService extends EventEmitter {
     this.process.on('exit', (code, signal) => {
       logger.warn({ code, signal }, 'MCP process exited');
       this.isReady = false;
+      if (code !== 0) {
+        this.recordCrash();
+      }
       this.scheduleRestart();
     });
 
@@ -83,6 +89,20 @@ class MCPService extends EventEmitter {
     }, config.mcp.restartDelay);
   }
 
+  recordCrash() {
+    const now = Date.now();
+    this.crashTimestamps = this.crashTimestamps.filter((t) => now - t < 60000);
+    this.crashTimestamps.push(now);
+    if (this.crashTimestamps.length > 5) {
+      logger.error('MCP crashed too often, exiting');
+      process.exit(1);
+    }
+  }
+
+  setSpawn(fn) {
+    this.spawn = fn;
+  }
+
   handleMessage(message) {
     try {
       const parsed = JSON.parse(message);
@@ -96,14 +116,7 @@ class MCPService extends EventEmitter {
         const duration = Date.now() - startTime;
         logger.debug({ method, duration }, 'MCP request completed');
 
-        if (parsed.error) {
-          const error = new Error(parsed.error.message || 'MCP error');
-          error.code = parsed.error.code;
-          error.data = parsed.error.data;
-          reject(error);
-        } else {
-          resolve(parsed.result);
-        }
+        resolve(parsed);
       }
       // Handle notifications (no id field)
       else if (parsed.method) {
@@ -131,9 +144,15 @@ class MCPService extends EventEmitter {
         params,
       };
 
+      try {
+        rpcRequestSchema.parse(request);
+      } catch (err) {
+        return reject(err);
+      }
+
       const timeout = setTimeout(() => {
         this.pendingRequests.delete(requestId);
-        reject(new Error('Request timed out'));
+        reject({ code: 504, message: 'Request timed out' });
       }, config.mcp.requestTimeout);
 
       this.pendingRequests.set(requestId, {

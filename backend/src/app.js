@@ -8,7 +8,7 @@ import swaggerUi from 'swagger-ui-express';
 import { StatusCodes } from 'http-status-codes';
 import { config } from './config/index.js';
 import logger, { requestLogger } from './utils/logger.js';
-import apiRoutes from './routes/api.js';
+import apiRoutes, { handleRpc } from './routes/api.js';
 import mcpService from './services/mcpService.js';
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -99,7 +99,10 @@ export function createApp() {
     })
   );
   
-  // API routes
+  // RPC endpoint at root for the React app
+  app.post('/rpc', handleRpc);
+
+  // Other API routes with /api prefix
   app.use('/api', apiRoutes);
 
   // Health check endpoint (not rate limited)
