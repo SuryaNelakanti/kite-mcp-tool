@@ -1,20 +1,18 @@
 import { createServer } from 'http';
 import request from 'supertest';
 import WebSocket from 'ws';
+import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 import EventEmitter from 'events';
 import { PassThrough } from 'stream';
 import createApp from '../app.js';
 import { mcpService, initWebSocketService } from '../services/index.js';
-import { jest } from '@jest/globals';
-import * as child from 'child_process';
-
 
 function createMockProcess() {
   const proc = new EventEmitter();
   proc.stdout = new PassThrough();
   proc.stderr = new PassThrough();
   proc.stdin = new PassThrough();
-  proc.kill = jest.fn(() => proc.emit('exit', 0));
+  proc.kill = vi.fn(() => proc.emit('exit', 0));
   return proc;
 }
 
@@ -24,17 +22,21 @@ describe('integration', () => {
   let mockProc;
   let wsService;
 
-  beforeAll((done) => {
+  beforeAll(async () => {
     mockProc = createMockProcess();
     mcpService.setSpawn(() => mockProc);
-
+  
     const app = createApp();
     server = createServer(app);
     wsService = initWebSocketService(server);
-    server.listen(0, () => {
-      port = server.address().port;
-      mcpService.start();
-      setTimeout(done, 1100); // wait for isReady
+  
+    await new Promise((resolve) => {
+      server.listen(0, () => {
+        port = server.address().port;
+        mcpService.start();
+        // Give MCPClient time to set ready state
+        setTimeout(resolve, 1000);
+      });
     });
   });
 
@@ -55,17 +57,30 @@ describe('integration', () => {
       const msg = JSON.parse(chunk.toString());
       const id = msg.id;
       const first = !mockProc.responded;
+
       if (first) {
         mockProc.stdout.write(
-          JSON.stringify({ jsonrpc: '2.0', id, error: { code: 401, data: { login_url: 'http://login' } } }) + '\n'
+          JSON.stringify({
+            jsonrpc: '2.0',
+            id,
+            error: { code: 401, data: { login_url: 'http://login' } },
+          }) + '\n'
         );
         mockProc.responded = true;
       } else {
         mockProc.stdout.write(
-          JSON.stringify({ jsonrpc: '2.0', id, result: { user_id: 'AB1234' } }) + '\n'
+          JSON.stringify({
+            jsonrpc: '2.0',
+            id,
+            result: { user_id: 'AB1234' },
+          }) + '\n'
         );
         mockProc.stdout.write(
-          JSON.stringify({ jsonrpc: '2.0', method: 'order_update', params: { status: 'COMPLETE' } }) + '\n'
+          JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'order_update',
+            params: { status: 'COMPLETE' },
+          }) + '\n'
         );
       }
     });
@@ -80,15 +95,16 @@ describe('integration', () => {
     expect(loginRes.body.login_url).toBe('http://login');
 
     const ws = new WebSocket(`ws://localhost:${port}/ws`);
+
     const msgPromise = new Promise((resolve) => {
       ws.on('message', (data) => {
-        const msg = JSON.parse(data);
+        const msg = JSON.parse(data.toString());
         if (msg.type === 'notification') {
           resolve(msg.method);
         }
       });
     });
-
+    
     const rpc2 = await request(`http://localhost:${port}`)
       .post('/rpc')
       .send({ jsonrpc: '2.0', id: 2, method: 'get_profile' });

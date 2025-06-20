@@ -1,7 +1,6 @@
 import React from 'react';
-import { FC, SVGProps } from 'react';
+import {  SVGProps } from 'react';
 
-type IconType = FC<SVGProps<SVGSVGElement>>;
 
 export const Icons = {
   // Logo

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { formatCurrency, formatPercentage, cn } from '../lib/utils';
 import { rpcRequest } from '../api/client';
@@ -99,7 +99,7 @@ const MarketData = () => {
   const {
     data: searchResults = [],
     isLoading: isSearching,
-    error: searchError,
+    error: _searchError,
   } = useQuery<Instrument[]>({
     queryKey: ['market-search', searchQuery],
     queryFn: async () => {
@@ -123,7 +123,7 @@ const MarketData = () => {
   const {
     data: selectedQuotes = [],
     isLoading: isQuotesLoading,
-    error: quotesError,
+    error: _quotesError,
     refetch: refetchQuotes,
   } = useQuery<Quote[]>({
     queryKey: ['market-quotes', selectedInstruments],

@@ -1,23 +1,35 @@
-name: CI
+name: PNPM CI
+
 on:
   push:
-    branches: [main]
   pull_request:
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        node-version: [22]
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Install dependencies
-        run: |
-          cd backend
-          npm ci
-      - name: Run tests
-        run: |
-          cd backend
-          CI=true npm test
+    - uses: actions/checkout@v4
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'pnpm'
+
+    - name: Install dependencies
+      run: pnpm install
+
+    - name: Run Lint (Oxlint)
+      run: pnpm run lint
+
+    - name: Run Tests
+      run: pnpm run test

@@ -16,10 +16,6 @@ app.use(helmet());
 app.use(cors({ origin: env.CORS_ORIGIN }));
 app.use(express.json());
 
-const rpcLatency = new promClient.Histogram({
-  name: 'rpc_latency_ms',
-  help: 'RPC latency',
-});
 
 app.get('/health', (_req, res) => {
   res.json({ uptime: process.uptime() });

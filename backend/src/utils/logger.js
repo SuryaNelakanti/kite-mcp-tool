@@ -1,5 +1,4 @@
 import pino from 'pino';
-import { config } from '../config/index.js';
 
 // Create a logger instance
 const logger = pino({

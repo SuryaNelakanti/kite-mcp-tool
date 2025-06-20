@@ -42,6 +42,7 @@ const Login = () => {
       // In a real app, you would exchange the code for an access token here
       // For now, we'll simulate a successful login
       // await exchangeCodeForToken(code);
+      console.info(code);
       
       // For demo purposes, we'll just redirect to the dashboard
       navigate('/');

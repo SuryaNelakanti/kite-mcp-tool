@@ -1,6 +1,5 @@
 import { spawn as childSpawn } from 'child_process';
 import { EventEmitter } from 'events';
-import RingBuffer from 'ringbufferjs';
 import { v4 as uuidv4 } from 'uuid';
 import { config } from '../config/index.js';
 import logger from '../utils/logger.js';
@@ -12,7 +11,6 @@ class MCPService extends EventEmitter {
     this.process = null;
     this.isReady = false;
     this.pendingRequests = new Map();
-    this.logs = new RingBuffer(1000);
     this.restartTimeout = null;
     this.crashTimestamps = [];
     this.spawn = childSpawn;
@@ -109,7 +107,7 @@ class MCPService extends EventEmitter {
       
       // Handle JSON-RPC responses
       if (parsed.id && this.pendingRequests.has(parsed.id)) {
-        const { resolve, reject, timeout, method, startTime } = this.pendingRequests.get(parsed.id);
+        const { resolve, _, timeout, method, startTime } = this.pendingRequests.get(parsed.id);
         clearTimeout(timeout);
         this.pendingRequests.delete(parsed.id);
 

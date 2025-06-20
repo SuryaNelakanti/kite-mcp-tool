@@ -23,7 +23,7 @@ class WebSocketService {
     });
 
     // Handle new connections
-    this.wss.on('connection', (ws, request) => {
+    this.wss.on('connection', (ws, _request) => {
       const clientId = uuidv4();
       this.clients.set(clientId, ws);
       logger.info(`New WebSocket connection: ${clientId}`);

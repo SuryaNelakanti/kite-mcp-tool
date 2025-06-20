@@ -5,7 +5,7 @@ import { rpcRequest } from '../api/client';
 import useAuth from '../hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/Table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
+import { Tabs, TabsList, TabsTrigger } from '../components/ui/Tabs';
 import { Button } from '../components/ui/Button';
 import { Icons } from '../components/ui/Icons';
 import { Skeleton } from '../components/ui/Skeleton';
